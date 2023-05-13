@@ -1,4 +1,4 @@
-from numpy import ndarray, shape, sum, zeros
+from numpy import ndarray, shape, sum, zeros, multiply
 
 def trisolve(A: ndarray, b: ndarray, upper: bool = True) -> ndarray:
     """
@@ -15,24 +15,25 @@ def trisolve(A: ndarray, b: ndarray, upper: bool = True) -> ndarray:
     else:
         return _ltrisolve(A, b)
 
-def _utrisolve(A, b):
-
-    m, n = shape(A)
-    x = zeros((n, 1))
-
-    for col in range(n):
-        tmp = b[col] - sum(x*A[col, :].T)
-        x[col] = tmp/A[col, col]
-
-    return x
-
 def _ltrisolve(A, b):
 
     m, n = shape(A)
     x = zeros((n, 1))
 
-    for col in range(n-1, -1, -1):
-        tmp = b[col] - sum(x*A[col, :].T)
+    for col in range(n):
+        tmp = b[col] - sum(multiply(x, A[col:col+1, :].T))
         x[col] = tmp/A[col, col]
+
+    return x
+
+def _utrisolve(A, b):
+
+    m, n = shape(A)
+    x = zeros((n, 1))
+
+    for col in range(n-1, -1, -1):
+        tmp = b[col] - sum(multiply(x, A[col:col+1, :].T))
+        x[col] = tmp/A[col, col]
+        print(x)
 
     return x
