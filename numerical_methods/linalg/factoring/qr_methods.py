@@ -1,7 +1,5 @@
 from numpy import ndarray, ones, zeros, eye, shape, matmul, all, double
-from ..util import norm
-from ..util import householder
-from ..solver import trisolve
+from ..util import norm, householder
 
 def qr(A: ndarray, verbose: bool = False, signs: ndarray = None) -> (ndarray, ndarray):
     """
@@ -68,55 +66,3 @@ def qr(A: ndarray, verbose: bool = False, signs: ndarray = None) -> (ndarray, nd
             print("R{}".format(col+1), R)
 
     return Q, R
-
-
-def qrsolve(A: ndarray, b: ndarray, overdetermined: bool = True) -> ndarray:
-    """
-    TODO : add description to qr solve function
-    """
-
-    if overdetermined:
-        return _odlsqrsolve(A, b)
-    else:
-        return _udlsqrsolve(A, b)
-
-
-def _odlsqrsolve(A, b):
-
-    m, n = shape(A);
-
-    if m != shape(b)[0]:
-        raise ValueError("Invalid matrix dimensions")
-
-    R = A
-
-    for col in range(n):
-
-        x = R[:, col]
-
-        if all(x[col+1:] == 0):
-            continue
-
-        y = zeros((m, 1))
-        if col != 0:
-            y[0:col-1] = x[0:col-1]
-        y[col] = norm(x[col:])
-
-        w = householder(x, y, w_only=True)
-        b = b - matmul(w, 2*matmul(w.T, b))
-
-        proj_R = matmul(2*w[col:], matmul(w[col:].T, R[col:, col:]))
-        R[col:, col:] = R[col:, col:] - proj_R
-
-    return trisolve(R[:col, :col], b, upper=True)
-
-
-def _udlsqrsolve(A, b):
-    """
-    TODO udls qr solver function
-    """
-
-    raise NotImplementedError()
-
-
-
